@@ -39,6 +39,84 @@
 
 ---
 
+## Metadata & Dataset Annotation Protocol (The "Ground Truth")
+
+Since actual Annual Reports do not come with pre-annotated datasets, we define a **Gold Standard Protocol** to create our own evaluation corpus.
+
+### 1. Ground Truth Schema (JSON)
+Every report in our test corpus is paired with a `ground_truth.json` file.
+```json
+{
+  "cin": "L17110MH1973PLC019786",
+  "year": "2023-24",
+  "segments": [
+    {"name": "Independent Auditor's Report", "page_start": 42, "page_end": 50},
+    {"name": "Consolidated Balance Sheet", "page_start": 52, "page_end": 52}
+  ],
+  "tables": [
+    {
+      "title": "Balance Sheet",
+      "page": 52,
+      "cells": [
+        {"row": "Total Assets", "col": "March 31, 2024", "value": "500000", "unit": "Cr"},
+        {"row": "Total Assets", "col": "March 31, 2023", "value": "450000", "unit": "Cr"}
+      ]
+    }
+  ],
+  "compliance_cases": [
+    {"rule_id": "IndAS_1_Assets_Match", "expected_result": "PASS", "evidence_pages": [52]}
+  ]
+}
+```
+
+### 2. "Gold Standard" Repository (Manual Work)
+We will manually annotate a core set of **5 reports** (Reliance, Tata Steel, BHEL, Coal India, SmallCap_X) to serve as our absolute benchmark.
+- **Task**: 100% manual verification of every table cell and section boundary.
+- **Effort**: ~40 man-hours total.
+- **Outcome**: A fixed, version-controlled dataset to measure CER, table extraction F1, and RAG accuracy.
+
+### 3. Synthetic Data for Compliance (Negative Samples)
+Real non-compliance is rare in top listed companies. To test our "Digital Auditor", we will create **Synthetic Violation Reports**:
+1.  **Deletion**: Remove the "Auditor Report" pages from a compliant PDF.
+2.  **Manipulation**: Change a total in the Balance Sheet to create an accounting mismatch (Assets != Liabilities).
+3.  **Corruption**: Redact mandatory IndAS disclosures (e.g., Contingent Liabilities note).
+**Goal**: Ensure the system triggers a "HIGH RISK" flag on these synthetic samples.
+
+---
+
+## Strategic Benchmark Datasets (For Component Validation)
+
+To ensure our OCR and layout engines are world-class before testing on BSE reports, we use the following **Global Benchmark Datasets**.
+
+### 1. Document Layout & Segmentation
+**Primary Goal**: Test the ability to distinguish between text, tables, and images.
+- **DocLayNet (IBM)**: 80,000+ pages of diverse documents.
+  - *Why*: High variability; excellent for testing "Structure Mapper" robustness.
+- **PubLayNet**: 360,000+ pages of scientific articles.
+  - *Why*: The standard for testing layout parsing (Text vs. Table vs. List).
+
+### 2. Table Extraction (The "Hard" Part)
+**Primary Goal**: Measure cell-level accuracy and structure preservation.
+- **FinTabNet (IBM)** ⭐: 70,000+ annual report pages with complex tables.
+  - *Why*: **Directly relevant** to our financial reporting challenge. Used for testing complex nested table parsing.
+- **PubTables-1M (Microsoft)**: 1 million tables with comprehensive annotations.
+  - *Why*: Best for testing borderless table detection and cell spanning.
+
+### 3. OCR Quality (Bilingual & Scanned)
+**Primary Goal**: Measure Character Error Rate (CER) on difficult text.
+- **OmniDocBench**: Comprehensive benchmark for multilingual document parsing.
+  - *Why*: Tests OCR quality across 3 language types including Devanagari/Hindi.
+- **ICDAR Datasets**: Specifically ICDAR 2019 (Table) and 2021 (Robust Reading).
+  - *Why*: Industry gold standard for benchmarking raw OCR performance on "noisy" or scanned documents.
+
+### 4. VLM & RAG Benchmarking
+**Primary Goal**: Test the "Insight Bot's" reasoning capability.
+- **DocVQA (Document Visual Question Answering)**:
+  - *Why*: Tests if the LLM can "see" a number in a specific part of a page and answer a question about it.
+- **OlmOCR-Bench**: Modern benchmark for Vision-Language Models (VLMs) like Llama-3-Vision.
+
+---
+
 ## Regulatory Documents: Free & Official
 
 ### IndAS Standards

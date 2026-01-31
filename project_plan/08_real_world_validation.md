@@ -69,12 +69,37 @@
   - Notes to Accounts: Page A to B
   - BRSR (if exists): Page C to D
 
-**Deliverable**: Excel file per company
-**Filename**: `ground_truth_reliance_2024.xlsx`
-**Sheets**: "Balance_Sheet", "Section_Map"
+**Deliverable**: A "Test Corpus Container" for each company
+**Format**:
+- `report.pdf`: The raw file from BSE.
+- `ground_truth.json`: The structured "ideal" output.
+- `validation.xlsx`: The human-readable source used for cross-audit.
 
-**Time Estimate**: 2 hours per report
-**Total Effort**: 20 hours (2.5 days)
+**JSON Schema Details**:
+We capture four critical layers:
+1.  **Layout**: Page boundaries for Auditor's Report, Financials, and ESG.
+2.  **Tables**: Cell values for Balance Sheet (CY & PY).
+3.  **Compliance**: Gold standard pass/fail for our 10 target rules.
+4.  **Footnotes**: Direct links between table entries and their explaining note pages.
+
+**Time Estimate**: 2 hours per report for manual extraction.
+**Total Effort**: 50 hours (for 25 reports).
+
+---
+
+## Phase 2B: Synthetic Violation Generation (The "Stress Test")
+
+To ensure the "Digital Auditor" actually catches errors, we must create a **Negative Dataset**.
+
+**Task**: Create 5 "Corrupted" versions of compliant reports.
+
+**Scenarios**:
+1.  **Scenario A (IndAS 1 Breach)**: Change "Total Assets" in the JSON/PDF so it no longer matches "Total Liabilities + Equity".
+2.  **Scenario B (Disclosure Breach)**: Delete the "Contingent Liabilities" note page from a Large Cap PDF using `qpdf`.
+3.  **Scenario C (Formatting Breach)**: Swap Assets and Liabilities rows to check Schedule III compliance.
+4.  **Scenario D (Auditor Conflict)**: Insert a "Qualified Opinion" text into a report that has otherwise perfect financials.
+
+**Deliverable**: 5 `violation_report.pdf` files with known `expected_flags.json`.
 
 ---
 
