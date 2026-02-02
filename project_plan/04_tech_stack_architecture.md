@@ -51,6 +51,8 @@ We prove that "Open" is now "Better" than "Closed" for specialized tasks.
     *   *Why*: The largest developer ecosystem on earth. Hiring maintainers is easy.
 *   **Search**: **SearXNG** (AGPL)
     *   *Why*: For the "Preliminary Examination Tool". Instead of paying for Bing API, we perform meta-searches across public indexes without tracking.
+*   **Compliance (UI/UX)**: **GIGW 3.0 Compliance**
+    *   *Why*: Mandatory for all Indian Government portals. Ensures WCAG 2.1 accessibility standards and a standardized user experience across NIC/CDAC environments.
 
 ---
 

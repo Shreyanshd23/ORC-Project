@@ -284,6 +284,7 @@ To ensure the "Digital Auditor" actually catches errors, we must create a **Nega
 **UAT Report**:
 - Task completion rate: Target 100%
 - Average satisfaction: Target >4/5
+- **GIGW 3.0 Check**: 100% compliance with mandatory accessibility parameters (WCAG 2.1).
 - Issues found: Document and prioritize
 
 ---
@@ -326,6 +327,7 @@ To ensure the "Digital Auditor" actually catches errors, we must create a **Nega
 - Show system architecture diagram
 - Explain 100% open source stack
 - Demonstrate air-gapped deployment (no internet LED indicator)
+- **Compliance Proof**: Show "Safe-to-Host" VAPT readiness report and GIGW 3.0 accessibility score.
 
 **Minute 12-15: Q&A**
 - Prepare answers for:
@@ -348,10 +350,13 @@ To ensure the "Digital Auditor" actually catches errors, we must create a **Nega
 - [ ] Load test: 100 concurrent uploads handled
 - [ ] System uptime: 99%+ during 1-week test period
 
-### Security Validation
+### Security & Compliance Validation
 - [ ] PII redaction tested (sample Director PAN redacted)
 - [ ] Audit logs verified (every action logged)
 - [ ] Air-gap tested (LLM pod has no internet)
+- [ ] **VAPT Audit**: 3rd-party assessment completed (Zero High/Critical vulnerabilities)
+- [ ] **GIGW 3.0**: Accessibility Audit passed (Level AA compliance)
+- [ ] **Safe-to-Host**: Certification obtained for deployment.
 
 ### User Validation
 - [ ] 5 UAT participants tested

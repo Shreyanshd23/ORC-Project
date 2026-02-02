@@ -48,6 +48,7 @@ This architecture ensures we meet:
 1.  **Digital Personal Data Protection (DPDP) Act, 2023**.
 2.  **MeitY Guidelines** for Government Data Classification.
 3.  **Cert-In** Security Auditing standards.
+4.  **VAPT (Security Auditing)**: Mandatory 3rd-party Vulnerability Assessment and Penetration Testing by a Cert-In empanelled auditor to achieve **"Safe-to-Host"** certification.
 
 ---
 
