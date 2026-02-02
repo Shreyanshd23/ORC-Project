@@ -120,6 +120,18 @@ We follow a strict **Task-Based Workflow**.
 
 ---
 
+## 🔒 Legal & Compliance
+
+**Proprietary Software**: This repository is the intellectual property of **Exascale Deeptech and AI Private Ltd.**
+- **License**: See [LICENSE](LICENSE) for strict usage terms.
+- **Contribution**: See [CONTRIBUTING.md](CONTRIBUTING.md) for NDA and security protocols.
+
+**Contact**: `tech@exascale-ai.com` for access or security inquiries.
+
+---
+
+---
+
 ## Competition Details
 
 **Challenge**: IndiaAI Financial Reporting Compliance
