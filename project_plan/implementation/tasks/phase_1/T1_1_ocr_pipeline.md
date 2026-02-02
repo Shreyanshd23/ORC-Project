@@ -36,12 +36,12 @@
 **Goal**: Validate our choice of OCR engine by comparing it against at least one alternative.
 
 **Requirements**:
-1.  **Alternative Engine**: Research and integrate ONE alternative OCR engine known for speed or accuracy. Document your selection rationale.
+1.  **Alternative Engine**: Research and integrate alternative OCR engine known for speed or accuracy. Document your selection rationale.
 2.  **Isolation**: Each engine should be callable independently - no complex orchestration needed at this stage.
 3.  **Fair Comparison**: Both engines should process the same test document under identical conditions.
 
 **Success Criteria**:
-- Two engines can be run via command-line selection
+- Engines can be run via command-line selection
 - Both produce comparable output formats (text/markdown)
 - Performance metrics (speed, accuracy) are measurable
 
@@ -51,12 +51,32 @@
 **Requirements**:
 1.  **Engine Selection**: Users should be able to choose which OCR engine to use via command-line flag.
 2.  **Output Format Control**: Support multiple output formats (at minimum: markdown and JSON).
-3.  **Documentation**: Update README with usage examples for all supported configurations.
+3.  **Processing Strategy**: Allow users to control processing quality/speed trade-offs (e.g., DPI settings, OCR mode).
+4.  **Documentation**: Update README with usage examples for all supported configurations.
+
+**Example Usage** (for reference):
+```bash
+# Basic usage with default engine
+uv run python -m src.vision.main --input report.pdf --output data/processed
+
+# Specify engine
+uv run python -m src.vision.main --input report.pdf --engine docling
+uv run python -m src.vision.main --input report.pdf --engine rapid
+
+# Control output format
+uv run python -m src.vision.main --input report.pdf --output-format markdown
+uv run python -m src.vision.main --input report.pdf --output-format json
+
+# Strategy/quality control
+uv run python -m src.vision.main --input report.pdf --strategy fast    # Lower DPI, faster
+uv run python -m src.vision.main --input report.pdf --strategy accurate # Higher DPI, slower
+```
 
 **Success Criteria**:
-- `--help` flag shows all available options
+- `--help` flag shows all available options with descriptions
 - Same PDF can be processed with different engines using different commands
 - Output format can be controlled via CLI flag
+- Processing strategy affects speed/quality trade-off measurably
 
 ### **Deliverables (Required for Competition)**:
 1.  **Robust System**: 
