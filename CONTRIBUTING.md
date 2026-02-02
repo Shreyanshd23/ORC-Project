@@ -14,7 +14,7 @@ Access to this repository is granted strictly on a **Need-to-Know basis** to:
 *   Full-time employees of Exascale Deeptech and AI Private Ltd.
 *   Contractors and partners with active Non-Disclosure Agreements (NDAs) and specific written authorization.
 
-If you have stumbled upon this repository by accident, you must disconnect immediately and notify `security@exascale-ai.com`.
+If you have stumbled upon this repository by accident, you must disconnect immediately and notify `tech@exascale-ai.com`.
 
 ## 2. Development Standards
 To maintain industry-grade quality and security, all contributors must adhere to the following:
