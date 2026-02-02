@@ -115,7 +115,7 @@ uv run python scripts/benchmark_ocr.py --ground-truth data/benchmarks/gt.txt --p
 We follow a strict **Task-Based Workflow**.
 1. **Check the Roadmap**: See [01_execution_roadmap.md](project_plan/implementation/tasks/01_execution_roadmap.md).
 2. **Pick a Task**: Status must be `[TODO]` or `[IN_PROGRESS]`.
-3. **Read the Spec**: Open the specific task file (e.g., `T1_4_base_engine_validation.md`) in `project_plan/implementation/tasks/`.
+3. **Read the Spec**: Open the specific task file (e.g., `T1_1_ocr_pipeline.md`) in `project_plan/implementation/tasks/`.
 4. **Implement & Verify**: Ensure you meet the "Validation" criteria before PR.
 
 ---
