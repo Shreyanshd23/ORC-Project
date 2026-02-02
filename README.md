@@ -9,8 +9,16 @@
 
 ## Folder Structure
 
-### 📁 `project_plan/` (FINALIZED - V2.0)
-**Contains**: Production-ready documentation with zero ambiguity
+### 📁 `src/` (CORE ENGINE)
+**Contains**: Python source code
+- `vision/`: OCR pipeline, Docling integration
+
+### 📁 `scripts/` (TOOLS)
+**Contains**: DevOps and Testing utilities
+- `benchmark_ocr.py`: Validation script
+
+### 📁 `project_plan/` (DOCUMENTATION)
+**Contains**: Production-ready documentation
 
 **Start Here**:
 1. **[01_readme_first.md](project_plan/01_readme_first.md)** - Executive summary and quick reference
@@ -71,34 +79,44 @@
 
 ---
 
-## Confidence Score Summary
+## ⚡ Developer Quick Start
 
-| Criterion | Score | Evidence |
-|:----------|:------|:---------|
-| Government-Centric | 95% | MeitY cloud, Cert-In logs, training |
-| Scalable | 90% | Queue architecture, GeM hardware |
-| Performant | 95% | Industry SLAs, benchmarks |
-| Real-World Proof | 90% | 25-report corpus, validation plan |
-| India-Centric | 98% | Hindi OCR, IndAS focus |
-| Secure | 95% | DPDP compliant, disaster recovery |
+### 1. Prerequisites
+- **Python**: 3.11+
+- **Tooling**: [uv](https://github.com/astral-sh/uv) (Recommended) or `pip`
+- **OS**: Mac (MPS), Linux (CUDA), or Windows (CPU/CUDA)
 
-**Overall**: 94% (Production-Ready)
+### 2. Installation
+```bash
+# 1. Install dependencies
+uv sync
 
----
+# 2. Verify environment
+uv run python infra/scripts/check_env.py
+```
 
-## Next Steps
+### 3. Usage
+**Running OCR on a Document:**
+```bash
+# Process a single PDF
+uv run python -m src.vision.main --input data/raw/report.pdf --output data/processed
 
-### Immediate (Day 0)
-1. Read `project_plan/01_readme_first.md`
-2. Download test reports from BSE India
-3. Create ground truth data (5 reports)
-4. Procure hardware via GeM OR confirm cloud access
+# Process an entire folder
+uv run python -m src.vision.main --input data/raw/ --output data/processed
+```
 
-### Implementation (Phase 1 - Week 1-2)
-5. Initialize Git repository
-6. Scaffold project structure
-7. Set up development environment
-8. Begin OCR pipeline development
+**Running Benchmarks:**
+```bash
+# Calculate Accuracy (CER/WER) against Ground Truth
+uv run python scripts/benchmark_ocr.py --ground-truth data/benchmarks/gt.txt --prediction data/processed/output.md
+```
+
+### 4. Contributing Flow
+We follow a strict **Task-Based Workflow**.
+1. **Check the Roadmap**: See [01_execution_roadmap.md](project_plan/implementation/tasks/01_execution_roadmap.md).
+2. **Pick a Task**: Status must be `[TODO]` or `[IN_PROGRESS]`.
+3. **Read the Spec**: Open the specific task file (e.g., `T1_4_base_engine_validation.md`) in `project_plan/implementation/tasks/`.
+4. **Implement & Verify**: Ensure you meet the "Validation" criteria before PR.
 
 ---
 
