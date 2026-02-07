@@ -25,7 +25,8 @@ venv/
 ENV/
 
 # Data & Models (Sovereign AI Protection)
-data/
+src/data/
+#data/
 models/
 *.pdf
 *.json
