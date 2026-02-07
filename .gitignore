@@ -1,4 +1,6 @@
+# --------------------
 # Python
+# --------------------
 __pycache__/
 *.py[cod]
 *$py.class
@@ -24,22 +26,38 @@ wheels/
 venv/
 ENV/
 
-# Data & Models (Sovereign AI Protection)
-src/data/
-#data/
-models/
-*.pdf
-*.json
-*.xlsx
-*.csv
+# --------------------
+# Data
+# --------------------
 
+# Ignore everything under data by default
+data/*
+
+# Allow the data directory itself
+!data/
+
+# Allow ONLY benchmarks
+!data/benchmarks/
+!data/benchmarks/**
+
+# --------------------
 # Environment & IDE
+# --------------------
 .env
 .python-version
 .vscode/
 .idea/
 .DS_Store
 
+# --------------------
 # Logs
+# --------------------
 logs/
 *.log
+# Virtual environments (ALL)
+venv/
+src/venv/
+
+# Python cache
+__pycache__/
+*.pyc

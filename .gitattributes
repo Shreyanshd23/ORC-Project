@@ -1,1 +1,7 @@
 *.parquet filter=lfs diff=lfs merge=lfs -text
+*.pdf filter=lfs diff=lfs merge=lfs -text
+*.json filter=lfs diff=lfs merge=lfs -text
+*.bin filter=lfs diff=lfs merge=lfs -text
+data/benchmarks/**/*.parquet filter=lfs diff=lfs merge=lfs -text
+data/benchmarks/**/*.pdf filter=lfs diff=lfs merge=lfs -text
+data/benchmarks/**/*.bin filter=lfs diff=lfs merge=lfs -text
