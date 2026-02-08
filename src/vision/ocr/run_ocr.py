@@ -199,7 +199,7 @@ def main():
         print(f"Pages      : {result['pages']}")
         print(f"Time (sec) : {result['time_sec']}")
 
-        print("\n=== ACCURACY (vs PubMed-OCR GT) ===")
+        print("\n=== ACCURACY  ===")
         for k, v in metrics.items():
             print(f"{k}: {v}")
 

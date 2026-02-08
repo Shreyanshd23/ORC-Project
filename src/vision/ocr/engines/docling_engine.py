@@ -9,6 +9,7 @@ from docling.document_converter import DocumentConverter
 from docling.datamodel.base_models import InputFormat
 from docling.document_converter import PdfFormatOption
 from docling.datamodel.pipeline_options import PdfPipelineOptions
+import os
 
 
 # -----------------------------
@@ -57,7 +58,12 @@ class OCREngine:
 
     # -----------------------------
     # Main OCR method
-    # -----------------------------
+    # 
+
+    
+
+
+
     def process_pdf(
         self,
         pdf_path: str,
@@ -65,8 +71,9 @@ class OCREngine:
         progress_cb: Optional[Callable[[str], None]] = None
     ) -> Dict[str, Any]:
 
-        pdf_path = Path(pdf_path)
-
+        pdf_path = Path(pdf_path).expanduser().resolve()
+        
+        
         if not pdf_path.exists():
             raise FileNotFoundError(f"PDF not found: {pdf_path}")
 

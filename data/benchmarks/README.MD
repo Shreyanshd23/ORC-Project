@@ -1,48 +1,66 @@
 # Data Structure Overview
 
 data/
-├── benchmarks/                    # Benchmark data
-│   ├── fintabnet/                # Financial table 
-│   │   ├── raw_parquet/          # Source parquet 
-│   │   └── gt_json/              # Ground truth =
-│   ├── doclaynet/                # Complex document 
-│   │   ├── raw_json/val/         # Source JSON files
-│   │   └── gt_json/              # Ground truth 
-│   └── icdar2013/                # Text OCR baseline
-│   |    └── gt_json/
-|    |    |___gt_txt     # Ground truth JSON files
-|    |___pubmed_ocr
-|    |__README.MD # Fintabnet,doclaynet,icdar extract
-|____ground_truth
+├── benchmarks/
+│   ├── fintabnet/                     # Financial table benchmark
+│   │   ├── raw_parquet/               # Source parquet files (NOT committed)
+│   │   ├── pdf/                       # Synthesized single-page PDFs
+│   │   └── gt_json/                   # OCR-style ground truth (generated)
+│   │
+│   ├── doclaynet/                     # Complex document layout benchmark
+│   │   ├── raw_json/val/              # Source COCO-style annotations
+│   │   ├── images/                    # Page images (dataset-provided)
+│   │   ├── pdf/                       # Synthesized single-page PDFs
+│   │   └── gt_json/                   # OCR-style ground truth (generated)
+│   │
+│   ├── icdar2013/                     # Text OCR baseline
+│   │   ├── pdf/
+│   │   └── gt_json/
+│   │
+│   └── README.md                      # Dataset preparation & usage
 
 
-# 📊  Benchmark Datasets
+# 📊 Benchmark Datasets
 
-1. FinTabNet - Financial Table Recognition
+## 1. FinTabNet – Financial Table Documents
 
-    Source: HuggingFace - FinTabNet OTSL conversion
+Source: HuggingFace (FinTabNet validation split)
 
-    Format: Parquet → JSON conversion
+Original Format:
+- Parquet files containing table annotations and rendered page images
 
-    Records: 10,505 validation samples
+Pipeline Format:
+- Page images → single-page PDFs (synthesized)
+- Table HTML / restored text → OCR-style ground truth JSON
 
-    Purpose: Test table structure recognition in financial documents
+Purpose:
+- Evaluate OCR robustness on financial documents containing dense tables
+- Measure text extraction accuracy in table-heavy layouts (CER/WER)
+## 2. DocLayNet – Complex Document Layouts
 
-2. DocLayNet - Complex Document Layout
+Source: Kaggle (DocLayNet validation split)
 
-    Source: Kaggle - DocLayNet validation split
+Original Format:
+- Page images + COCO-style layout annotations
 
-    Format: JSON (COCO-style annotations)
+Pipeline Format:
+- Page images → single-page PDFs (synthesized)
+- Layout text regions → OCR-style ground truth JSON
 
-    Purpose: Test document layout analysis and region detection
+Purpose:
+- Evaluate OCR performance on complex multi-region documents
+- Stress-test layout-heavy financial and report-style pages
+## 3. ICDAR 2013 – Text OCR Baseline
 
-3. ICDAR 2013 - Text OCR Baseline
+Source: Synthetic scaffold aligned with ICDAR 2013 format
 
-    Source: Synthetic placeholder dataset
+Format:
+- PDF documents
+- Line- and word-level OCR ground truth JSON
 
-    Format: JSON with text lines and bounding boxes
-
-    Purpose: Establish baseline for pure text OCR accuracy
+Purpose:
+- Establish a clean baseline for pure text OCR
+- Validate metric correctness independent of layout complexity
 
 # 🛠️ Scripts Documentation
 

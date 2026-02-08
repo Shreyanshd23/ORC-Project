@@ -58,7 +58,7 @@ def is_valid_pdf(pdf_path: str) -> bool:
         return False
 
 
-# -----------------------------
+# -----------------------------s
 # Tesseract OCR Engine
 # -----------------------------
 class TesseractEngine(BaseOCREngine):
@@ -78,7 +78,8 @@ class TesseractEngine(BaseOCREngine):
         progress_cb: Optional[Callable[[str], None]] = None
     ) -> Dict[str, Any]:
 
-        pdf_path = Path(pdf_path)
+        pdf_path = Path(pdf_path).expanduser().resolve()
+
 
         if not pdf_path.exists():
             raise FileNotFoundError(f"PDF not found: {pdf_path}")
