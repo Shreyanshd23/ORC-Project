@@ -3,13 +3,13 @@
 # --------------------
 __pycache__/
 *.py[cod]
-*$py.class
 *.so
 .Python
-env/
+
+# Packaging / build
 build/
-develop-eggs/
 dist/
+develop-eggs/
 downloads/
 eggs/
 .eggs/
@@ -22,23 +22,35 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Virtual environments
 .venv/
 venv/
 ENV/
+src/venv/
 
 # --------------------
-# Data
+# Data (STRICT)
 # --------------------
 
-# Ignore everything under data by default
+# Ignore all data by default
 data/*
 
-# Allow the data directory itself
+# Allow folder structure
 !data/
-
-# Allow ONLY benchmarks
 !data/benchmarks/
-!data/benchmarks/**
+
+# Allow ONLY small benchmark artifacts
+!data/benchmarks/**/*.json
+!data/benchmarks/**/*.txt
+!data/benchmarks/**/*.md
+
+# Explicitly block large files even inside benchmarks
+data/benchmarks/**/*.parquet
+data/benchmarks/**/*.pdf
+data/benchmarks/**/*.zip
+data/benchmarks/**/*.pt
+data/benchmarks/**/*.onnx
 
 # --------------------
 # Environment & IDE
@@ -54,10 +66,3 @@ data/*
 # --------------------
 logs/
 *.log
-# Virtual environments (ALL)
-venv/
-src/venv/
-
-# Python cache
-__pycache__/
-*.pyc

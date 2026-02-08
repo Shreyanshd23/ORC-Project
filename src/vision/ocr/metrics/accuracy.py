@@ -1,10 +1,16 @@
 from jiwer import cer, wer
 from rapidfuzz.distance import Levenshtein
 import re
+from typing import Dict
 
+
+# -----------------------------
+# Normalization
+# -----------------------------
 def normalize_text(text: str) -> str:
     """
-    Strong normalization to reduce layout-induced CER inflation.
+    Strong normalization to reduce layout-induced CER/WER inflation.
+    Intended for OCR benchmarking, not semantic comparison.
     """
     if not text:
         return ""
@@ -17,34 +23,58 @@ def normalize_text(text: str) -> str:
     return text.strip()
 
 
+# -----------------------------
+# Metrics
+# -----------------------------
 def compute_cer(ground_truth: str, ocr_text: str) -> float:
-    ground_truth = normalize_text(ground_truth)
-    ocr_text = normalize_text(ocr_text)
-    return round(cer(ground_truth, ocr_text), 4)
+    """
+    Character Error Rate (CER)
+    """
+    gt = normalize_text(ground_truth)
+    pred = normalize_text(ocr_text)
 
+    if not gt:
+        return 0.0
+
+    return round(cer(gt, pred), 4)
 
 
 def compute_wer(ground_truth: str, ocr_text: str) -> float:
-    ground_truth = normalize_text(ground_truth)
-    ocr_text = normalize_text(ocr_text)
-    return round(wer(ground_truth, ocr_text), 4)
+    """
+    Word Error Rate (WER)
+    """
+    gt = normalize_text(ground_truth)
+    pred = normalize_text(ocr_text)
 
+    if not gt:
+        return 0.0
+
+    return round(wer(gt, pred), 4)
 
 
 def character_accuracy(ground_truth: str, ocr_text: str) -> float:
-    ground_truth = normalize_text(ground_truth)
-    ocr_text = normalize_text(ocr_text)
-
-    dist = Levenshtein.distance(ground_truth, ocr_text)
-    return round(1 - dist / max(len(ground_truth), 1), 4)
-
-
-def accuracy_report(ground_truth: str, ocr_text: str) -> dict:
     """
-    Unified OCR accuracy report
+    Character-level accuracy (1 - normalized Levenshtein distance)
+    """
+    gt = normalize_text(ground_truth)
+    pred = normalize_text(ocr_text)
+
+    if not gt:
+        return 0.0
+
+    dist = Levenshtein.distance(gt, pred)
+    return round(1 - dist / max(len(gt), 1), 4)
+
+
+# -----------------------------
+# Unified report
+# -----------------------------
+def accuracy_report(ground_truth: str, ocr_text: str) -> Dict[str, float]:
+    """
+    Unified OCR accuracy report.
     """
     return {
         "CER": compute_cer(ground_truth, ocr_text),
         "WER": compute_wer(ground_truth, ocr_text),
-        "Char_Accuracy": character_accuracy(ground_truth, ocr_text)
+        "Char_Accuracy": character_accuracy(ground_truth, ocr_text),
     }
