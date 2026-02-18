@@ -6,7 +6,10 @@ from pathlib import Path
 from engines.docling_engine import OCREngine
 from engines.tesseract_engine import TesseractEngine
 from engines.trocr_engine import TrOCREngine
+
 from metrics.accuracy import accuracy_report
+from metrics.accuracy_financial import financial_accuracy_report
+from metrics.compliance_rules import validate_compliance
 
 
 # -----------------------------
@@ -22,60 +25,60 @@ ENGINES = {
 # -----------------------------
 # Helpers
 # -----------------------------
-def extract_gt_text(gt_json_path: str) -> str:
+def extract_gt_text(gt_json: dict) -> str:
     """
-    Extract ground-truth text from multiple GT JSON formats.
-    Supports:
-    - PubMed-OCR
-    - Layout annotation (form-based, DocLayNet/PubLayNet style)
-    - Line / paragraph OCR
-    - Plain text GT
+    Fully recursive GT extractor.
+
+    - Walks entire JSON structure
+    - Collects all string values that look like real OCR/text
+    - Skips metadata keys
+    - Works for ANY dataset format
+    - Automatically future-proof
     """
-    with open(gt_json_path, encoding="utf-8") as f:
-        gt = json.load(f)
 
-    # PubMed-OCR format
-    if "ocr" in gt and "text" in gt["ocr"] and "lines" in gt["ocr"]["text"]:
-        return "\n".join(line["text"] for line in gt["ocr"]["text"]["lines"])
+    collected_text = []
+    seen = set()
 
-    # Layout-annotation format (your check_ocr dataset)
-    if "form" in gt and isinstance(gt["form"], list):
-        texts = [
-            block["text"]
-            for block in gt["form"]
-            if isinstance(block, dict)
-            and "text" in block
-            and block["text"].strip()
-        ]
-        return "\n".join(texts)
+    # Keys that usually contain non-content metadata
+    SKIP_KEYS = {
+        "bbox", "box", "id", "id_box", "id_box_line",
+        "page_no", "page", "page_start", "page_end",
+        "original_width", "original_height",
+        "coco_width", "coco_height",
+        "metadata", "font", "flags",
+        "span_num", "line_num", "block_num"
+    }
 
-    # Line-based OCR
-    if "lines" in gt and isinstance(gt["lines"], list):
-        return "\n".join(line.get("text", "") for line in gt["lines"])
+    def recurse(obj):
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                if k in SKIP_KEYS:
+                    continue
+                recurse(v)
 
-    # Paragraph-based OCR
-    if "paragraphs" in gt and isinstance(gt["paragraphs"], list):
-        return "\n".join(p.get("text", "") for p in gt["paragraphs"])
+        elif isinstance(obj, list):
+            for item in obj:
+                recurse(item)
 
-    # Plain text GT
-    if "text" in gt and isinstance(gt["text"], str):
-        return gt["text"]
+        elif isinstance(obj, str):
+            text = obj.strip()
+            if text and text not in seen:
+                seen.add(text)
+                collected_text.append(text)
 
-    raise ValueError("Unsupported ground-truth JSON format")
+        # ignore numbers / None / booleans
+
+    recurse(gt_json)
+
+    return "\n".join(collected_text)
 
 
 
 def normalize(text: str) -> str:
-    """
-    Light normalization for fair CER/WER comparison.
-    """
     return " ".join(text.lower().split())
 
 
 def progress_cb(msg: str):
-    """
-    CLI-friendly progress callback.
-    """
     print(f"[STATUS] {msg}")
 
 
@@ -84,62 +87,56 @@ def progress_cb(msg: str):
 # -----------------------------
 def main():
     parser = argparse.ArgumentParser(
-        description="OCR CLI (T1.1 – Vision Layer)"
+        description="OCR CLI (Integrated Evaluation Mode)"
     )
 
-    parser.add_argument("pdf", help="Path to input PDF file")
+    parser.add_argument("pdf", help="Path to input PDF")
 
     parser.add_argument(
         "--engine",
         default="docling",
         choices=ENGINES.keys(),
-        help="OCR engine to use",
+        help="OCR engine",
     )
 
-    parser.add_argument(
-    "--ground_truth",
-    help="Ground truth JSON file (PubMed-OCR or layout-annotation format)",
-    )
-
+    parser.add_argument("--ground_truth", help="Ground truth JSON file")
 
     parser.add_argument(
         "--output-format",
         choices=["text", "markdown", "json"],
         default="text",
-        help="Output format to emit",
+        help="Output format",
     )
 
     parser.add_argument(
         "--strategy",
         choices=["fast", "accurate"],
         default="accurate",
-        help="Processing strategy (speed vs accuracy)",
+        help="Speed vs accuracy",
     )
 
-    parser.add_argument(
-        "--output",
-        help="Optional output file path",
-    )
+    parser.add_argument("--output", help="Optional output path")
+
+    parser.add_argument("--start-page", type=int, default=None)
+    parser.add_argument("--end-page", type=int, default=None)
 
     args = parser.parse_args()
 
     # -----------------------------
-    # Strategy → engine config
+    # Engine config
     # -----------------------------
     engine_kwargs = {}
-
     if args.engine in {"tesseract", "trocr"}:
         engine_kwargs["dpi"] = 150 if args.strategy == "fast" else 300
 
-    # -----------------------------
-    # Run OCR
-    # -----------------------------
     try:
         engine = ENGINES[args.engine](**engine_kwargs)
 
         result = engine.process_pdf(
             args.pdf,
             progress_cb=progress_cb,
+            start_page=args.start_page,
+            end_page=args.end_page,
         )
 
     except Exception as e:
@@ -147,9 +144,6 @@ def main():
         print(f"Error: {e}")
         sys.exit(1)
 
-    # -----------------------------
-    # Handle engine-level failure
-    # -----------------------------
     if not result.get("success", True):
         print("\n❌ OCR failed gracefully")
         print(f"PDF   : {result.get('pdf')}")
@@ -157,19 +151,20 @@ def main():
         sys.exit(1)
 
     # -----------------------------
-    # Emit output
+    # Emit OCR Output
     # -----------------------------
     if args.output_format == "text":
         output_data = result["text"]
-
     elif args.output_format == "markdown":
         output_data = result.get("markdown", result["text"])
-
-    else:  # json
+    else:
         output_data = result
 
     if args.output:
-        Path(args.output).write_text(
+        output_path = Path(args.output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        output_path.write_text(
             json.dumps(output_data, indent=2)
             if isinstance(output_data, dict)
             else output_data,
@@ -177,31 +172,93 @@ def main():
         )
     else:
         print("\n=== OCR OUTPUT ===")
-        print(
-            output_data
-            if isinstance(output_data, str)
-            else json.dumps(output_data, indent=2)
-        )
+        print(output_data if isinstance(output_data, str)
+              else json.dumps(output_data, indent=2))
 
     # -----------------------------
-    # Accuracy (optional)
+    # Evaluation Mode
     # -----------------------------
-    if args.ground_truth:
-        gt_text = normalize(
-            extract_gt_text(args.ground_truth)
+    if not args.ground_truth:
+        return
+
+    with open(args.ground_truth, encoding="utf-8") as f:
+        gt_json = json.load(f)
+
+    benchmark_report = {
+        "engine": args.engine,
+        "pages_processed": result["pages"],
+        "time_sec": result["time_sec"],
+    }
+
+    # -----------------------------
+    # 1️⃣ TECHNICAL OCR ACCURACY
+    # -----------------------------
+    gt_text = extract_gt_text(gt_json)
+
+    if gt_text.strip():
+        print("\n==============================")
+        print("📊 TECHNICAL OCR ACCURACY")
+        print("==============================")
+
+        technical_metrics = accuracy_report(
+            normalize(gt_text),
+            normalize(result["text"])
         )
-        pred_text = normalize(result["text"])
 
-        metrics = accuracy_report(gt_text, pred_text)
-
-        print("\n=== OCR BENCHMARK ===")
-        print(f"Engine     : {args.engine}")
-        print(f"Pages      : {result['pages']}")
-        print(f"Time (sec) : {result['time_sec']}")
-
-        print("\n=== ACCURACY  ===")
-        for k, v in metrics.items():
+        for k, v in technical_metrics.items():
             print(f"{k}: {v}")
+
+        benchmark_report["technical_accuracy"] = technical_metrics
+    else:
+        print("\n📊 Technical accuracy skipped (structured GT detected)")
+        benchmark_report["technical_accuracy"] = "skipped"
+
+    # -----------------------------
+    # 2️⃣ FINANCIAL ACCURACY
+    # -----------------------------
+    if "tables" in gt_json:
+        print("\n==============================")
+        print("📈 FINANCIAL ACCURACY")
+        print("==============================")
+
+        financial_metrics = financial_accuracy_report(
+            gt_json,
+            result["text"]
+        )
+
+        for k, v in financial_metrics.items():
+            print(f"{k}: {v}")
+
+        benchmark_report["financial_accuracy"] = financial_metrics
+
+    # -----------------------------
+    # 3️⃣ COMPLIANCE VALIDATION
+    # -----------------------------
+    if "compliance_cases" in gt_json:
+        print("\n==============================")
+        print("⚖ COMPLIANCE VALIDATION")
+        print("==============================")
+
+        compliance_results = validate_compliance(
+            gt_json,
+            result["text"]
+        )
+
+        for rule in compliance_results:
+            print(f"{rule['rule']}: {rule['status']}")
+
+        benchmark_report["compliance"] = compliance_results
+
+    # -----------------------------
+    # Save Benchmark Report
+    # -----------------------------
+    report_path = Path("benchmark_report.json")
+    report_path.write_text(
+        json.dumps(benchmark_report, indent=2),
+        encoding="utf-8"
+    )
+
+    print("\n📁 benchmark_report.json saved")
 
 
 if __name__ == "__main__":
